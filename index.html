@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cat vs Dog Classifier</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            width: 320px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        h2 {
+            margin-bottom: 15px;
+        }
+
+        input[type="file"] {
+            margin: 15px 0;
+        }
+
+        button {
+            padding: 10px 18px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        .result {
+            margin-top: 20px;
+            font-size: 16px;
+        }
+
+        .confidence {
+            color: #555;
+            margin-top: 5px;
+        }
+
+        .error {
+            color: red;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>Cat vs Dog Classifier</h2>
+
+    <input type="file" id="imageInput" accept="image/*">
+    <br>
+    <button onclick="predict()">Predict</button>
+
+    <div class="result" id="result"></div>
+    <div class="confidence" id="confidence"></div>
+    <div class="error" id="error"></div>
+</div>
+
+<script>
+    async function predict() {
+        const fileInput = document.getElementById("imageInput");
+        const resultDiv = document.getElementById("result");
+        const confidenceDiv = document.getElementById("confidence");
+        const errorDiv = document.getElementById("error");
+
+        resultDiv.innerText = "";
+        confidenceDiv.innerText = "";
+        errorDiv.innerText = "";
+
+        if (!fileInput.files.length) {
+            errorDiv.innerText = "Please upload an image.";
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("file", fileInput.files[0]);
+
+        try {
+            const response = await fetch("http://127.0.0.1:8000/predict", {
+                method: "POST",
+                body: formData
+            });
+
+            if (!response.ok) {
+                throw new Error("Prediction failed");
+            }
+
+            const data = await response.json();
+
+            resultDiv.innerText = "Prediction: " + data.prediction;
+            confidenceDiv.innerText = "Confidence: " + (data.confidence * 100).toFixed(2) + "%";
+
+        } catch (err) {
+            errorDiv.innerText = "Error: " + err.message;
+        }
+    }
+</script>
+
+</body>
+</html>
